@@ -1,0 +1,5 @@
+interface:
+  display_name: "Grill Me"
+  short_description: "계획을 라운드 단위 질문으로 다듬는다 (사용자가 직접 부를 때만)"
+policy:
+  allow_implicit_invocation: false

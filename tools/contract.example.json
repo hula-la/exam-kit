@@ -1,0 +1,29 @@
+{
+  "title": "출력 계약 점검 (예시. 과제 안내에 맞게 고쳐서 verify/contract.json 으로 저장)",
+  "run": ["python3 scripts/build.py"],
+  "files": [
+    {
+      "path": "output/result.csv",
+      "why": "안내 '제출물' 절: output/result.csv, 열 lot_id,date,qty, 날짜 오름차순",
+      "columns": ["lot_id", "date", "qty"],
+      "exact_columns": false,
+      "min_rows": 1,
+      "unique": ["lot_id"],
+      "not_empty": ["lot_id", "qty"],
+      "sorted": [["date", "asc"]],
+      "encoding": "utf-8"
+    },
+    {
+      "path": "README.md",
+      "why": "안내: 실행 방법과 검증 결과를 README에 적는다",
+      "contains": ["실행 방법", "검증"],
+      "min_bytes": 200
+    },
+    {
+      "path": "output/summary.json",
+      "why": "안내: 합계는 summary.json 의 total",
+      "json_keys": ["total"]
+    }
+  ],
+  "custom": "verify/custom_checks.py"
+}

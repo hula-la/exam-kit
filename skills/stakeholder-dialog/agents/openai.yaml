@@ -1,0 +1,3 @@
+interface:
+  display_name: "Stakeholder Dialog"
+  short_description: "담당자에게 보낼 질문·합의문·공유 메시지 초안을 만든다"
