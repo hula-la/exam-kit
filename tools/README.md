@@ -1,12 +1,16 @@
-# kit/
+# 표준 라이브러리 작업 도구
 
-공개 저장소 github.com/hula-la/exam-kit 에서 가져온 범용 점검 도구. 과제 내용과 무관하고, 표준 라이브러리만 쓴다.
+| 명령 | 용도 |
+|---|---|
+| `python3 kit/profile.py <자료>` | 원문을 고치지 않고 구조·단위·누락·중복 등을 점검 |
+| `python3 kit/xlsx2csv.py 파일.xlsx --out 작업폴더` | XLSX를 별도 위치의 CSV로 변환. 원본 옆 출력은 피함 |
+| `python3 kit/check.py [verify/contract.json] [--run] [--log [경로.md]]` | 형식 계약·선택적 교차 검증 → verify/last_result.md. --log 기본은 notes/work.md |
+| `python3 kit/preview.py [경로…] [--serve [PORT]] [--host HOST]` | README·notes·검증·output을 읽는 HTML → preview/index.html |
 
-| 명령 | 하는 일 |
-| --- | --- |
-| `python3 kit/profile.py <자료 폴더 또는 파일>` | 자료 점검(읽기 전용): 인코딩, 열·행, 중복, 날짜 형식 혼용, 단위, 시간 역행, 자료 속 지시문. 문서(MD, TXT)는 분량·제목·지시문 |
-| `python3 kit/xlsx2csv.py 파일.xlsx --out /tmp/xlsx [--serial-dates]` | 엑셀 시트를 CSV로(pandas·openpyxl 없이). `--out`이 없으면 원본 옆에 생기므로 자료 폴더 밖을 지정한다 |
-| `python3 kit/check.py [verify/contract.json] [--run] [--log]` | 출력 계약 점검 → `verify/last_result.md`. `--log`면 `notes/verification.md`에 한 줄 추가(다른 파일에 쓰려면 `--log 경로.md`). 계약에 `run`이 있고 `--run`을 안 주면 '실행 N개' 항목이 보류 한 줄로 나온다(정상. `--run`을 주면 그 명령을 먼저 실행하고 출력을 덮어쓴다). 처음부터 다시 만들어 점검하려면 `sh verify/run.sh`(예시는 `output/`을 지우고 다시 만든다. 지우면 안 되는 파일이 거기 있으면 `rm -rf output &&` 부분만 뺀다) |
-| `python3 kit/preview.py [경로...] [--serve [PORT]]` | README·notes·verify·output을 HTML 한 장으로(경로를 주면 그것만 본다. 출력 폴더가 `output/`이 아니면 `README.md notes verify/last_result.md <출력 폴더>`처럼 전부 적는다). `--serve`면 PORT(기본 8787)로 브라우저 미리보기에서 본다 |
+check 종료 코드: **0 실행한 검사 모두 통과**, **1 실패**, **2 보류·검사 없음·설정 오류**. `run`을 적고 `--run`을 주지 않으면 실행 보류로 표시합니다. `--run`은 계약의 명령을 실행하므로 자신의 승인된 코드인지 확인합니다. `custom`도 Python 코드를 실행합니다. 형식 검사는 의미·권한·알고리즘 최적성을 대신 검증하지 않습니다.
 
-예시 파일: `contract.example.json`, `custom_checks.example.py`, `run.example.sh` → `verify/` 아래에 복사해 과제에 맞게 고친다.
+`contract.example.json`, `custom_checks.example.py`, `run.example.sh`는 예시입니다. 실제 과제·합의한 규칙에 맞춰 verify/ 아래에 필요한 것만 사용합니다. 예시 run은 output/을 일괄 삭제하지 않습니다.
+
+미리보기 서버 기본은 **127.0.0.1:8787**입니다. 웹 IDE가 외부 바인딩을 요구하고 해당 환경에서 허용된 경우에만 `--host 0.0.0.0`을 지정합니다. 서버를 열지 않아도 생성 HTML을 읽을 수 있습니다. 작업 경로를 지정하면 기본 목록 대신 그 경로만 표시합니다.
+
+요청문은 kit/prompts/, 범용 가이드는 kit/guide/index.html, 선택 양식은 kit/templates/에 있습니다.

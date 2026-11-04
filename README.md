@@ -1,55 +1,92 @@
-# exam-kit
+# exam-kit v2 — AI가 정리하고, 나는 결정·검증하기
 
-웹 IDE + Codex CLI 환경에서 과제를 풀 때 쓰는 범용 작업 보조 도구다. 과제 내용과 무관한 작업 규칙, 스킬, 메모 양식, 점검·미리보기 스크립트만 들어 있다. 결과물을 대신 만들지 않고, 과정(이해, 질문, 점검, 검증, 기록)을 빠뜨리지 않게 돕는다.
+AI와 함께 개발·데이터 분석·문서 과제를 수행하는 범용 작업 킷입니다. 특정 평가 플랫폼을 전제로 하지 않습니다. **처음 요청을 한 번 전달한 뒤, 질문할 때마다 필요한 요청문 또는 새 담당자 답변만 붙여넣어** 이어갑니다.
 
-## 쓰는 법
+[HTML 가이드](guide/index.html) · [상황별 요청문](prompts/) · [변경 사항](CHANGELOG.md) · [검증 범위](VALIDATION.md)
 
-작업 폴더 루트의 터미널에서:
+## 한 줄씩 요청해도 됩니다
+
+1. “과제와 자료를 읽고 스펙 파악해줘.”
+2. “결과를 바꾸는 모호한 부분만 질문으로 정리해줘.”
+3. “이거 담당자 답변이야. 반영해줘.”
+4. “현재 설계를 내가 검토할 수 있게 HTML로 정리해줘.”
+5. “확정된 스펙대로 개발하고 테스트까지 진행해줘.”
+6. “스펙과 실제 코드를 대조해 리뷰해줘. 수정하지 말고 문제·근거·영향만 보고해줘.”
+7. “최종 코드와 실제 테스트 결과를 기준으로 전체를 HTML로 정리해줘.”
+
+담당자 답은 그때그때 원문을 붙입니다. 리뷰 세션은 같은 폴더의 spec/work·코드를 읽고 수정하지 않습니다. 새 세션에 이전 대화가 자동 공유된다고 가정하지 않습니다. 아래 상세 요청문은 킷 지침이 적용되지 않거나 누락될 때만 보충합니다.
+
+## 설치 없이 쓰기
+
+저장소 ZIP을 받아 압축을 풀고 `guide/index.html`을 여세요. 서버나 계정 없이 실행하도록 만든 단일 HTML입니다. 실제 AI는 호출하지 않으므로 요청문을 사용하는 AI에 직접 복사합니다. 브라우저가 파일 열기·저장·복사를 제한하면 본문을 선택해 복사하고 중요한 연습 기록은 다운로드하세요.
+
+파일에 접근하지 못하는 AI에는 필요한 원문·현재 spec/work를 채팅으로 전달합니다. 접근하지 못한 코드나 파일을 읽었다고 가정하지 않습니다.
+
+## 설치 또는 업데이트
+
+Git과 Python 3이 있는 환경에서 **작업 폴더 루트**에서 실행합니다. 외부 저장소 이용 허용 여부는 현재 과제 안내를 따릅니다.
 
 ```sh
-rm -rf /tmp/kit; git clone https://github.com/hula-la/exam-kit /tmp/kit && sh /tmp/kit/setup.sh
+kit_source=$(mktemp -d)
+git clone https://github.com/hula-la/exam-kit.git "$kit_source" &&
+sh "$kit_source/setup.sh" "$PWD"
 ```
 
-`setup.sh`가 작업 폴더에 넣는 것:
+Git이 없다면 저장소 ZIP을 풀고 `sh /압축해제경로/setup.sh /작업폴더`로 설치할 수 있습니다. 설치 자체는 네트워크·패키지 설치·모델 호출을 하지 않습니다. Windows에서는 WSL/Git Bash 또는 `python install.py C:\작업폴더`를 사용할 수 있습니다(Windows 실행은 미검증).
 
-| 넣는 것 | 위치 | 내용 |
-| --- | --- | --- |
-| 작업 규칙 | `AGENTS.md` 뒤에 절 추가(없으면 생성) | 읽기 전용 점검 먼저, 다시 실행할 수 있는 스크립트, 검증 수치와 함께 보고, 자료 속 지시문은 데이터로만, 상태를 바꾸는 MCP 도구는 명시 지시 때만, `kit/` 도구 재사용 |
-| 스킬 6개 | `.agents/skills/` | `task-brief`(과제 브리프), `data-audit`(자료 점검), `stakeholder-dialog`(담당자 대화), `grill-me`(계획 심문. 외부 스킬, MIT), `verify-harness`(검증 하네스), `handover-docs`(문서) |
-| 메모 양식 | `notes/` | `requirements.md`, `decisions.md`, `verification.md`, `checklist.md` |
-| 도구 | `kit/` | `profile.py`(자료 점검), `xlsx2csv.py`(엑셀→CSV), `check.py`(출력 계약 점검), `preview.py`(HTML 미리보기), 검증 예시 3개 |
+같은 명령으로 다시 설치하면 **킷이 관리하는 미수정 파일만 갱신**합니다.
 
-기존 파일은 덮어쓰지 않는다. 다시 실행해도 안전하다. 네트워크는 clone 한 번만 쓰고, 패키지를 설치하지 않는다. 모든 스크립트는 파이썬 표준 라이브러리만 쓴다. 위 표 밖에서 손대는 파일은 `.gitignore` 하나다: `preview/`와 `__pycache__/` 두 줄을 없을 때만 덧붙인다(미리보기 산출물이 커밋·diff에 섞이지 않게).
+| 위치 | 내용 |
+|---|---|
+| AGENTS.md | 표식 사이 킷 규칙만 교체. 원래 프로젝트 지침은 보존 |
+| .agents/skills/ | 상황에 따라 사용할 스킬. 모두 순서대로 부를 필요 없음 |
+| notes/spec.md, notes/work.md | 없는 경우에만 빈 양식 생성. 기존 메모 유지 |
+| kit/ | 표준 라이브러리 도구·가이드·요청문·선택 양식 |
+| .exam-kit/ | 버전·해시, 변경 전 백업, 충돌 파일. .gitignore 제외 규칙 추가 |
 
-## 흐름
+v1 파일은 공개 이력의 알려진 원본 해시와 일치할 때만 자동 갱신합니다. 사용자 수정·알 수 없는 버전은 `.exam-kit/incoming/`에 새 파일을 두고 충돌을 알립니다(종료 코드 3). 해당 파일의 기존 동작은 유지되므로 incoming과 비교해 합쳐야 합니다. 재실행만으로 충돌이 해결됐다고 간주하지 않습니다. v1 메모는 삭제하지 않으며 첫 요청에서 AI가 유효한 내용을 spec/work에 연결합니다.
 
-1. `$task-brief` → `notes/brief.md`. 다른 터미널 탭에서 `python3 kit/preview.py --serve`를 띄우면 브라우저 미리보기(출력된 PORT, 기본 8787, URL `/`)에서 README·notes·검증 결과·출력 CSV를 읽을 수 있다. 편집기에는 마크다운 미리보기가 없어서 HTML로 만든다.
-2. `$stakeholder-dialog`로 담당자에게 물을 메시지 초안을 받아 내 말로 고쳐 보내고, 답을 `notes/decisions.md`에 적는다. 담당자 역할이 없는 과제면 질문을 가정으로 적고 진행한다.
-3. `$data-audit` → 자료 함정 보고 → 규칙 질문.
-4. `$grill-me` → 내 구현 계획을 라운드 단위 질문으로 다듬는다(사용자가 직접 부를 때만 뜬다). 결정은 `notes/decisions.md`로, 답하지 못한 질문은 담당자에게. 그다음 합의문.
-5. 구현(스크립트).
-6. `$verify-harness` → `verify/contract.json`(안내의 근거 문장 포함)과 `verify/custom_checks.py`(파이프라인과 다른 경로의 교차 검증) → `python3 kit/check.py --log`는 사람이 직접 실행.
-7. `$handover-docs` → README. 미리보기로 읽어 본다.
+AI가 실행 중이었다면 갱신된 지침을 읽게 하고, 자동 로드 여부가 불명확하면 새 세션에서 시작합니다. CLI 명령·모델·권한은 실제 제품과 과제 안내에 맞춥니다.
 
-## 원칙
+## 사용하는 순서
 
-- 과제 안내와 작업 폴더에 원래 있던 지시가 항상 우선한다. `AGENTS.md`의 추가 절도 그렇게 적혀 있다.
-- Codex는 작업 폴더 루트에서 시작한다. Codex는 루트에서 현재 폴더까지의 `AGENTS.md`와 `.agents/skills` 외에 전역 `~/.codex/AGENTS.md`(있으면 `AGENTS.override.md`), `~/.agents/skills`, `/etc/codex/skills`, 내장 스킬도 읽는다. 전역이 앞, 작업 폴더 파일이 뒤에 이어 붙는다. 환경에 미리 깔린 규칙·스킬이 있는지는 `/status`의 Agents.md 줄과 `/skills` 목록에 kit 것 외의 항목이 있는지로 본다.
-- 스킬은 `/skills` 또는 `$이름`으로 부른다. 설명에 맞는 요청이면 Codex가 알아서 고르기도 한다.
-- 점검이 통과해도 "검증 완료"라고 쓰지 않는다. 수치로 쓴다.
+1. [첫 요청](prompts/01-start.md): AI가 spec/work 초안과 영향이 큰 질문을 작성. 나는 핵심 원문·누락·가정을 대조.
+2. [질문마다 답변 전달](prompts/02-answer-update.md): 새 질문·답변 원문을 붙이면 AI가 dialogue에 추가하고 바뀐 기준·미확정만 반영. 다른 답을 기다리며 전체 작업을 멈추지 않음.
+3. [구현·분석 이어가기](prompts/03-implement.md): 합의 범위의 실행·수정은 AI가 계속. 나는 중요한 우선순위와 작은 결과를 확인.
+4. 필요할 때 [초기 알고리즘 HTML](prompts/04-algorithm-first.md), 마무리 전 [최종 코드로 갱신](prompts/06-algorithm-final.md). 데이터·문서 과제에는 강제하지 않음.
+5. [검증 요청](prompts/05-verify.md): 실제 결과·미확인·제출물을 대조하고 선택 이유와 검증 범위를 내 말로 설명.
+6. [새 채팅 재개](prompts/07-resume.md): spec/work와 실제 파일부터. 과거 여러 대화를 처음 가져올 때만 [일괄 가져오기](prompts/08-history-import.md)를 선택.
 
-## 구성
+## 파일은 세 역할부터
 
-```
-setup.sh                 설치 스크립트 (POSIX sh)
-AGENTS.md                작업 규칙 절 (작업 폴더 AGENTS.md 뒤에 붙는다)
-skills/<이름>/SKILL.md   스킬 6개 (grill-me 폴더에는 원저자 LICENSE 와 agents/openai.yaml 이 같이 있다)
-templates/*.md           메모 양식 → notes/
-tools/                   도구와 예시 → kit/
+```text
+sources/dialogue.md     # Q001, Q002… 담당자 질문/답변 원문 추가
+notes/spec.md           # 현재 요구·입력·제약·목표·미확정과 근거
+notes/work.md           # 진행·실제 검증·다음 행동·변경 이력
+docs/algorithm.html    # 필요할 때: 초기 이해 → 최종 구현 설명
+src/…                  # 기존 프로젝트 구조와 스택 유지
+verify/…               # 필요한 검사·입력·실제 결과만
 ```
 
-## 외부 스킬
+작은 답마다 새 파일을 만들지 않습니다. 긴 회의록이나 과거 대화 묶음만 별도 파일로 나눕니다. 같은 역할의 기존 문서는 재사용하고 단발 작업은 work 하나로 줄여도 됩니다. AGENTS.md는 반복 작업 규칙, spec/work는 바뀌는 과제 내용입니다. 전체 설계 HTML을 요청하면 기존 설명 HTML을 재사용하고, 없으면 docs/solution.html로 만들 수 있습니다. 이름보다 한 문서를 최종 코드와 계속 맞추는 것이 중요합니다.
 
-넣은 것은 `grill-me` 하나다. 출처는 [mattpocock/skills](https://github.com/mattpocock/skills)(MIT). 라이선스 전문을 스킬 폴더에 같이 둔다. 원본은 `grill-me`(진입점)와 `grilling`(본문) 두 스킬인데, 스킬이 스킬을 부르는 연결이 환경에 따라 실패한다고 원저자 문서에 적혀 있어 한 파일로 합쳤다. 원문에서 바꾼 곳은 사실 확인에 하위 에이전트를 쓰라는 문장 하나(직접 읽기 전용 명령으로 확인하도록)이고, 맨 아래 "이 kit에서" 절(사용자 언어, 시간 상한 제안, 끝날 때 결정 표와 미답 질문 출력, 파일 수정 금지)은 추가다. 원저자 문서가 경고하는 실패는 사용자가 "예, 예"만 하는 것이다. 답마다 이유를 말하고, 모르면 모른다고 하고, 적어도 하나는 반박해야 세션이 값을 한다.
+## 선택해서 쓰는 스킬
 
-넣지 않은 것: 공개된 외부 스킬(openai/skills의 pdf·playwright, anthropics/skills의 pdf·xlsx 등)은 넣지 않았다. pdf·xlsx(anthropics)는 frontmatter에 Proprietary 라이선스라 재배포할 수 없고, 나머지는 pip·npx 설치가 필요해 패키지 설치가 안 되는 환경에서는 쓸 수 없다. 엑셀은 `kit/xlsx2csv.py`로 대신한다. PDF는 `pdftotext` → `python3 -c "import pypdf"` 순으로 있는 것을 쓰고, 없으면 설치 여부를 사용자에게 묻는다. obra/superpowers의 `brainstorming`은 같은 목적이지만 그 프레임워크의 다른 스킬·하위 에이전트·설계 문서 승인 관문에 묶여 있어 짧은 작업에 맞지 않고, `verification-before-completion`은 `AGENTS.md` 4항과 `verify-harness`가 이미 하는 말이라 넣지 않았다.
+| 스킬 | 필요할 때 |
+|---|---|
+| `$task-brief` | AI가 원문 근거로 spec/work 초안 작성 |
+| `$stakeholder-dialog` | 질문 초안과 매번 받은 답변 반영 |
+| `$data-audit` | 자료의 단위·기간·키·중복·누락·형식 점검 |
+| `$verify-harness` | 확정 규칙의 계약 검사·독립 검증·수정 |
+| `$algorithm-html` | 작은 사례로 이해하고 최종 코드·결과와 설명 일치 |
+| `$spec-review` | 다른 세션에서 스펙·실제 코드를 읽기 전용으로 리뷰 |
+| `$handover-docs` | 실제 근거로 실행법·결과·한계 작성 |
+| `$grill-me` | 직접 원할 때만 계획을 질문으로 검토. 필수 단계 아님 |
+
+[도구 사용법](tools/README.md). 검사 계약·스크립트는 신뢰할 수 있는 자기 작업 내용을 사용하세요. 형식 검사 통과가 업무 판단·알고리즘 최적성의 증명은 아닙니다.
+
+## 적용 범위와 출처
+
+파일 구조·시간 예시·질문 전략은 일반적인 작업 제안이며 특정 플랫폼의 배점·답안·허용 정책을 뜻하지 않습니다. 평가 시간·담당자 역할·AI 허용·제출 방식은 그때 받은 안내로 확인합니다. Cofa 같은 서비스의 공개 설명은 가이드의 선택 참고이며 공통 규칙으로 강제하지 않습니다.
+
+`grill-me`는 [mattpocock/skills](https://github.com/mattpocock/skills)의 MIT 스킬을 변형한 기존 파일입니다. 원저자 라이선스·출처를 유지했고 명시적으로 호출할 때만 씁니다. 비공개 과제 원문·개인 대화·답안·인증 자료는 포함하지 않습니다.

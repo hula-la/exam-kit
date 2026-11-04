@@ -1,3 +1,3 @@
 interface:
-  display_name: "Verify Harness"
-  short_description: "verify/contract.json 과 교차 검증으로 결과물을 한 명령으로 점검한다"
+  display_name: "실제 결과를 검증하고 수정"
+  short_description: "현재 과제·합의 규칙에 맞는 계약 검사와 독립 검증을 실행하고 승인 범위의 실패를 수정한다"

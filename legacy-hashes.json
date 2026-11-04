@@ -1,0 +1,70 @@
+{
+  "AGENTS.md": [
+    "20fc82ee48d8c4c9b6369c51973e8833e46cd7e05ff6ec4857216bc0ce3ffd1e",
+    "5276d1d528bb3b5b40aa4a57d3afe7e6b4f8d8f9ddf56a71a321c152edea0144"
+  ],
+  ".agents/skills/verify-harness/SKILL.md": [
+    "4077a89e363d2887d5039f2ca627d095d6c647dde8988158dd70a694bf952bda"
+  ],
+  ".agents/skills/handover-docs/SKILL.md": [
+    "da9cd3c0805ba7d4d5256470355cc47e26b0f77752af270f6a28d2d47e16a75e"
+  ],
+  ".agents/skills/task-brief/SKILL.md": [
+    "27a4ea9e9482be84a6a5f2c01335d98fb53857da2a35c4e9afe785a0019ba114"
+  ],
+  ".agents/skills/stakeholder-dialog/SKILL.md": [
+    "f9197403880ad6250c91c1873dbbb9c7cf2a8154400ee7166b1409556958d02a"
+  ],
+  ".agents/skills/grill-me/LICENSE": [
+    "0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5"
+  ],
+  ".agents/skills/grill-me/SKILL.md": [
+    "2289d614b7d0434487096e6f18e9448f9bf91d2c68f664d92cd6e84748f3378b",
+    "6ebb8e4975640dda409099a4d23578c65b77fb8abccde1cba55dbcc340a3735f"
+  ],
+  ".agents/skills/data-audit/SKILL.md": [
+    "c3ff7cb0830d0b774a89780075f4e07c214279495091ab5320bdd2352a2daad7"
+  ],
+  ".agents/skills/data-audit/agents/openai.yaml": [
+    "f37e5305667c12f261f4504efa882b3ba956298e68bf0246bb79ed8d6e48eb77"
+  ],
+  ".agents/skills/grill-me/agents/openai.yaml": [
+    "819deddf4a7609870c865885e28ac6866e3155c0d51a9a8970ec536687ae3da6"
+  ],
+  ".agents/skills/stakeholder-dialog/agents/openai.yaml": [
+    "4a0c0f537045f4d29c1355a4c4ea3819fa8a0de2be8b2bec08a19ed37e09076a"
+  ],
+  ".agents/skills/task-brief/agents/openai.yaml": [
+    "9159e9be01888cd1ec4647451786222191b31b68b6bd69155fac18751c018117"
+  ],
+  ".agents/skills/handover-docs/agents/openai.yaml": [
+    "8b50d1b48d72cb2b9ed14e9897072d9a6368a3bb1ef65b4e4ff7afa2050f2012"
+  ],
+  ".agents/skills/verify-harness/agents/openai.yaml": [
+    "9c6b89043179cb7234123b03046fad6647b583c8730a90f8b30051bd7865ed7a"
+  ],
+  "kit/preview.py": [
+    "2caa130199c2d461a801975f29e12c10c102fa24bba7b596f84a9958cbb83bec"
+  ],
+  "kit/check.py": [
+    "fdc001ee263e6455cc671f59e536badd3671cb5ded13aa9bf839129461a0e2a7"
+  ],
+  "kit/profile.py": [
+    "ff204f5fc237d236fb5ae5e8c3e8431ec42014eb02d9fb620d2bdfcc73ef1ebc"
+  ],
+  "kit/README.md": [
+    "442aacfa1a15d2bbddae22390e73d4ee9a4cd50497b83f144f94787ed3dd61bc"
+  ],
+  "kit/xlsx2csv.py": [
+    "0c3929560abcfc9bcb3585e76bc25ee2a518f0954221ed8b49d76287b6b03737"
+  ],
+  "kit/custom_checks.example.py": [
+    "553967c83e19cdbac44d9846b123752028f7e2c131c5cfc34afec150bda60ea3"
+  ],
+  "kit/contract.example.json": [
+    "beee8fa27e5cb52284543f7d941bbd62eafb555b33330e3646e6746a4dc86d1a"
+  ],
+  "kit/run.example.sh": [
+    "053a39d1ab4df8c341f72691cb528f0428e51e318dbbf74ceed7345629093778"
+  ]
+}

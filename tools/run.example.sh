@@ -3,6 +3,6 @@
 # 사용: sh verify/run.sh   (작업 폴더 루트에서)
 set -e
 cd "$(dirname "$0")/.."            # 작업 폴더 루트
-rm -rf output && mkdir -p output    # 이전 출력 삭제 (계약에 없는 파일이 섞이지 않게). output/ 에 과제가 준 파일이 있거나 산출물 폴더가 다르면 이 줄을 고쳐 내 스크립트가 만든 파일만 지운다
+mkdir -p output                   # 원문·사용자 파일을 보존. 생성 파일 갱신은 build.py에서 명시적으로 처리한다.
 python3 scripts/build.py            # 파이프라인 (과제에 맞게 고친다)
 python3 kit/check.py verify/contract.json --log

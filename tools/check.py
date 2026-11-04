@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """출력 계약 점검. 표준 라이브러리만 쓴다.
 
-사용: python3 kit/check.py [verify/contract.json] [--run] [--log [notes/verification.md]] [--out verify/last_result.md] [--root .]
+사용: python3 kit/check.py [verify/contract.json] [--run] [--log [notes/work.md]] [--out verify/last_result.md] [--root .]
 
 계약(JSON) 예: kit/contract.example.json
   "run":    ["python3 scripts/build.py"]   --run 을 줄 때만 순서대로 실행한다(출력을 덮어쓰므로 기본은 실행 안 함)
@@ -191,7 +191,7 @@ def main(argv):
         elif a == "--out":
             out = argv[i + 1]; i += 1
         elif a == "--log":
-            log = "notes/verification.md"
+            log = "notes/work.md"
             if i + 1 < len(argv) and argv[i + 1].endswith(".md"):
                 log = argv[i + 1]; i += 1
         elif a in ("-h", "--help"):
@@ -206,6 +206,13 @@ def main(argv):
         c = json.load(open(cpath, encoding="utf-8"))
     except ValueError as e:
         print("계약 JSON 오류: %s" % e); return 2
+    if (not isinstance(c, dict)
+            or not isinstance(c.get('files', []), list)
+            or any(not isinstance(s, dict) for s in c.get('files', []))
+            or not isinstance(c.get('run', []), list)
+            or any(not isinstance(s, str) for s in c.get('run', []))
+            or (c.get('custom') is not None and not isinstance(c['custom'], str))):
+        print('계약 형식 오류: files는 객체 목록, run은 명령 문자열 목록, custom은 경로 문자열이어야 합니다.'); return 2
     items = []
     if c.get("run"):
         items += run_cmds(c["run"], root) if do_run else [("실행 %d개" % len(c["run"]), None, "--run 을 주지 않아 실행하지 않음(출력을 덮어쓰므로)")]
@@ -217,9 +224,10 @@ def main(argv):
     p = sum(1 for _, ok, _ in items if ok is True)
     f = sum(1 for _, ok, _ in items if ok is False)
     h = n - p - f
+    status = "FAIL" if f else ("HOLD" if h or not n else "PASS")
     now = datetime.now().strftime("%Y-%m-%d %H:%M")
     lines = ["# %s" % c.get("title", "출력 계약 점검"), "", "- 계약: `%s`  - 실행 시각: %s" % (contract, now),
-             "- **%d개 중 통과 %d, 실패 %d, 보류 %d**" % (n, p, f, h), "",
+             "- **%d개 중 통과 %d, 실패 %d, 보류 %d — %s**" % (n, p, f, h, status), "",
              "| # | 항목 | 판정 | 근거 |", "| --- | --- | --- | --- |"]
     for k, (name, ok, detail) in enumerate(items, 1):
         lines.append("| %d | %s | %s | %s |" % (k, name.replace("|", "\\|"), mark(ok), str(detail).replace("|", "\\|").replace("\n", " ")))
@@ -233,11 +241,11 @@ def main(argv):
         lpath = os.path.join(root, log)
         os.makedirs(os.path.dirname(lpath) or ".", exist_ok=True)
         if not os.path.exists(lpath):
-            open(lpath, "w", encoding="utf-8").write("# 검증 기록\n\n| 시각 | 무엇을 | 방법 | 결과(수치) | 판정 |\n| --- | --- | --- | --- | --- |\n")
+            open(lpath, "w", encoding="utf-8").write("# 작업·검증 기록\n")
         with open(lpath, "a", encoding="utf-8") as fh:
-            fh.write("| %s | 출력 계약 점검 | kit/check.py %s | 통과 %d/%d, 실패 %d, 보류 %d | %s |\n" % (now, contract, p, n, f, h, "FAIL" if f else "PASS"))
+            fh.write("\n- %s · 출력 계약 %s · kit/check.py · 통과 %d/%d, 실패 %d, 보류 %d · %s · 상세: %s\n" % (now, contract, p, n, f, h, status, out))
         print("기록: %s" % log)
-    return 1 if f else 0
+    return 1 if f else (2 if h or not n else 0)
 
 
 if __name__ == "__main__":

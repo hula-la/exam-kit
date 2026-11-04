@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 """노트·결과물을 HTML 한 장으로 만들어 브라우저 미리보기에서 읽는다. 표준 라이브러리만 쓴다.
 
-사용: python3 kit/preview.py [경로...] [--out preview] [--serve [PORT]] [--rows 200] [--title 제목]
+사용: python3 kit/preview.py [경로...] [--out preview] [--serve [PORT]] [--host HOST] [--rows 200] [--title 제목]
 기본 경로(있는 것만): README.md notes verify/last_result.md output
   경로를 하나라도 주면 기본 경로 대신 그것만 본다. 출력 폴더가 output/ 이 아니면 전부 적는다:
   python3 kit/preview.py README.md notes verify/last_result.md <출력 폴더> --serve
   .md → 렌더(제목, 목록, 표, 코드, 인용, 굵게, 링크)   .csv/.tsv → 표(앞 --rows 행)   .json/.txt/.log → 그대로
---serve: 0.0.0.0:PORT(기본 8787)로 띄운다. 브라우저 미리보기에서 PORT와 URL / 를 연다. / 를 열 때마다 다시 만든다.
+--serve: 기본 127.0.0.1:8787. 웹 IDE에서 외부 바인딩이 필요하고 허용된 경우 --host 0.0.0.0을 지정한다. / 를 열 때마다 다시 만든다.
 """
 import csv
 import html
@@ -18,6 +18,7 @@ import sys
 from datetime import datetime
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+from urllib.parse import urlsplit
 
 DEFAULT_PATHS = ["README.md", "notes", "verify/last_result.md", "output"]
 EXTS = (".md", ".csv", ".tsv", ".json", ".txt", ".log")
@@ -63,12 +64,23 @@ def read_text(path):
     return raw.decode("utf-8", "replace"), "utf-8(대체)"
 
 
+def safe_link(match):
+    label, url = match.group(1), html.unescape(match.group(2))
+    try:
+        scheme = urlsplit(url).scheme.lower()
+    except ValueError:
+        return label
+    if scheme not in ('', 'http', 'https', 'mailto') or any(ord(c) < 32 for c in url) or '\\' in url:
+        return label
+    return '<a href="%s">%s</a>' % (html.escape(url, quote=True), label)
+
+
 def inline(s):
     s = html.escape(s, quote=False)
     s = INLINE_CODE.sub(lambda m: "<code>%s</code>" % m.group(1), s)
     s = BOLD.sub(r"<strong>\1</strong>", s)
     s = ITALIC.sub(r"<em>\1</em>", s)
-    s = LINK.sub(r'<a href="\2">\1</a>', s)
+    s = LINK.sub(safe_link, s)
     s = s.replace("[ ]", "☐").replace("[x]", "☑").replace("[X]", "☑")
     for word, cls in (("통과", "pass"), ("실패", "fail"), ("보류", "hold"), ("PASS", "pass"), ("FAIL", "fail")):
         if s.strip() == word:
@@ -242,7 +254,7 @@ class Handler(SimpleHTTPRequestHandler):
 
 def main(argv):
     cfg = dict(CONFIG)
-    paths, serve, port = [], False, 8787
+    paths, serve, port, host = [], False, 8787, "127.0.0.1"
     i = 0
     while i < len(argv):
         a = argv[i]
@@ -252,6 +264,8 @@ def main(argv):
             cfg["rows"] = int(argv[i + 1]); i += 1
         elif a == "--title":
             cfg["title"] = argv[i + 1]; i += 1
+        elif a == "--host":
+            host = argv[i + 1]; i += 1
         elif a == "--serve":
             serve = True
             if i + 1 < len(argv) and argv[i + 1].isdigit():
@@ -270,10 +284,10 @@ def main(argv):
         return 0
     handler = partial(Handler, directory=os.path.abspath(cfg["out"]))
     try:
-        srv = ThreadingHTTPServer(("0.0.0.0", port), handler)
+        srv = ThreadingHTTPServer((host, port), handler)
     except OSError as e:
         print("포트 %d 를 열 수 없음: %s. 다른 포트: python3 kit/preview.py --serve 8788" % (port, e)); return 1
-    print("미리보기 서버 켜짐: 0.0.0.0:%d → 브라우저 미리보기에서 PORT %d, URL / 를 연다. 새로고침하면 다시 만든다. 끄기: Ctrl+C" % (port, port))
+    print("미리보기 서버 켜짐: %s:%d → URL / · 새로고침하면 다시 만든다. 끄기: Ctrl+C" % (host, srv.server_port))
     try:
         srv.serve_forever()
     except KeyboardInterrupt:
